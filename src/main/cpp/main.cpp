@@ -21,11 +21,9 @@
 #include <frc2/command/SequentialCommandGroup.h>
 #include <iostream>
 
+#include "ctre/Phoenix.h"
+
 using namespace std;
-
-
-
-
 
 class Helen_Test : public frc::TimedRobot {
 
@@ -56,6 +54,10 @@ class Helen_Test : public frc::TimedRobot {
    * these parameters to match your setup
 
    */
+  NT_Subscriber ySub;
+  double prev = 0;
+
+  double prev = 0;
 
   static const int leftLeadDeviceID = 4, leftFollowDeviceID = 3, rightLeadDeviceID = 2, rightFollowDeviceID = 1;
 
@@ -67,6 +69,8 @@ class Helen_Test : public frc::TimedRobot {
 
   rev::CANSparkMax m_rightFollowMotor{rightFollowDeviceID, rev::CANSparkMax::MotorType::kBrushless};
 
+  TalonSRX linear_slider = {1};
+  
   rev::SparkMaxRelativeEncoder leftLead_encoder = m_leftLeadMotor.GetEncoder();
 
   rev::SparkMaxRelativeEncoder rightLead_encoder = m_rightLeadMotor.GetEncoder();
@@ -130,7 +134,6 @@ class Helen_Test : public frc::TimedRobot {
         // }
     // }
 
- public:
 
     int enc_res = 42;
     int wheelbase = 20; // in
@@ -142,6 +145,7 @@ class Helen_Test : public frc::TimedRobot {
     // states current_state = DRIVE;
 
     Helen_Test() {}
+
 
     void RobotInit() override{
         m_rightFollowMotor.Follow(m_rightLeadMotor, false);
@@ -161,13 +165,17 @@ class Helen_Test : public frc::TimedRobot {
     //pi/2 per second at half speed
     //linear
 
-
+   
     void AutonomousPeriodic() override {
         // drive(-20);
         // m_robotDrive.TankDrive(0.5, 0.0);
         // m_leftLeadMotor.Set(0.5);
         // turn(90);
-        // drive(50);
+        // drive(-50);
+        // turn(45);
+        linear_slider.Set(ControlMode::PercentOutput, 10);
+       
+
         // turn(-90);
         // bool stop = frc::SmartDashboard::GetBoolean("stop", false);
         // if (stop){
@@ -177,13 +185,13 @@ class Helen_Test : public frc::TimedRobot {
         // }
         // std::cout << stop << std::endl;
         // drive(50);
-        std::cout << "TURNING" << std::endl;
-        auto time_ms = chrono::milliseconds(5000);
-        arc_turn_right(25, 5, time_ms, 3.14);
-        // clearEncoders();
-        // drive(50);
-        // arc_turn_right(50, 5, 3.14);
-        std::cout << "EXIT" << std::endl;
+        // std::cout << "TURNING" << std::endl;
+        // auto time_ms = chrono::milliseconds(5000);
+        // arc_turn_right(25, 5, time_ms, 3.14);
+        // // clearEncoders();
+        // // drive(50);
+        // // arc_turn_right(50, 5, 3.14);
+        // std::cout << "EXIT" << std::endl;
 
     }
     //encoder resolution: 42
@@ -198,10 +206,10 @@ class Helen_Test : public frc::TimedRobot {
     }
 
     void turn(float angle) {
-        float encoder_goal = ((angle/360)*(3.14*wheel_diam) * enc_res);
+        float encoder_goal = abs(((angle/360)*(3.14*wheel_diam) * enc_res))/2;
         float speed = 0.4;
         if(angle > 0) {
-            while(leftLead_encoder.GetPosition()<= encoder_goal || abs(rightLead_encoder.GetPosition())<= encoder_goal) {
+            while((leftLead_encoder.GetPosition()<= encoder_goal + 5|| leftLead_encoder.GetPosition() <= encoder_goal - 5)  && (abs(rightLead_encoder.GetPosition())<= encoder_goal -5 || abs(rightLead_encoder.GetPosition())<= encoder_goal + 5)) {
                 int errorLeft = encoder_goal - leftLead_encoder.GetPosition();
                 int errorRight = encoder_goal - abs(rightLead_encoder.GetPosition());
                 int k = 0.5;
@@ -309,7 +317,7 @@ class Helen_Test : public frc::TimedRobot {
         if(encoder_goal > 0) {
             float speed = 0.5;
             std::cout << "GETPOSITION " << leftLead_encoder.GetPosition() << " ENCODERGOAL " << encoder_goal << std::endl;
-            while(leftLead_encoder.GetPosition() <= encoder_goal && rightLead_encoder.GetPosition() <= encoder_goal) {
+            while((leftLead_encoder.GetPosition() <= encoder_goal + 50 || leftLead_encoder.GetPosition() <=encoder_goal - 50) && (rightLead_encoder.GetPosition() <= encoder_goal + 50 || rightLead_encoder.GetPosition() <= encoder_goal- 50)) {
                 double errorLeft = encoder_goal - leftLead_encoder.GetPosition();
                 double errorRight = encoder_goal - rightLead_encoder.GetPosition();
                 int k = 0.5;
@@ -332,7 +340,7 @@ class Helen_Test : public frc::TimedRobot {
         }
         else {
             float speed = 0.3;
-            while(leftLead_encoder.GetPosition() >= encoder_goal || rightLead_encoder.GetPosition() >= encoder_goal) {
+            while((leftLead_encoder.GetPosition() >= encoder_goal + 50 || leftLead_encoder.GetPosition() >= encoder_goal - 50) && (rightLead_encoder.GetPosition() >= encoder_goal + 50 || rightLead_encoder.GetPosition() >= encoder_goal - 50)) {
                 int errorLeft = abs(encoder_goal) - abs(leftLead_encoder.GetPosition());
                 int errorRight = abs(encoder_goal) - abs(rightLead_encoder.GetPosition());
                 int k = 0.2;
@@ -357,6 +365,9 @@ class Helen_Test : public frc::TimedRobot {
         frc::SmartDashboard::PutNumber("Right Lead Position", rightLead_encoder.GetPosition());
         frc::SmartDashboard::PutNumber("Left Follower Position", leftFollower_encoder.GetPosition());
         frc::SmartDashboard::PutNumber("Right Follower Position", rightLead_encoder.GetPosition());
+
+        frc::SmartDashboard::GetNumber("X", 0);
+        frc::SmartDashboard::GetNumber("Y", 0);
 
     }
 };
