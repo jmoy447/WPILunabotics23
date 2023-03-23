@@ -55,9 +55,6 @@ class Helen_Test : public frc::TimedRobot {
 
    */
   NT_Subscriber ySub;
-  double prev = 0;
-
-  double prev = 0;
 
   static const int leftLeadDeviceID = 4, leftFollowDeviceID = 3, rightLeadDeviceID = 2, rightFollowDeviceID = 1;
 
@@ -144,7 +141,7 @@ class Helen_Test : public frc::TimedRobot {
     // enum states {DRIVE = 0, TURN = 1};
     // states current_state = DRIVE;
 
-    Helen_Test() {}
+    // Helen_Test() {}
 
 
     void RobotInit() override{
@@ -173,8 +170,8 @@ class Helen_Test : public frc::TimedRobot {
         // turn(90);
         // drive(-50);
         // turn(45);
-        linear_slider.Set(ControlMode::PercentOutput, 10);
-       
+        // linear_slider.Set(ControlMode::PercentOutput, 10);
+       print_encoders();
 
         // turn(-90);
         // bool stop = frc::SmartDashboard::GetBoolean("stop", false);
@@ -366,8 +363,11 @@ class Helen_Test : public frc::TimedRobot {
         frc::SmartDashboard::PutNumber("Left Follower Position", leftFollower_encoder.GetPosition());
         frc::SmartDashboard::PutNumber("Right Follower Position", rightLead_encoder.GetPosition());
 
-        frc::SmartDashboard::GetNumber("X", 0);
-        frc::SmartDashboard::GetNumber("Y", 0);
+        double x_val = frc::SmartDashboard::GetNumber("X", 0);
+        double y_val = frc::SmartDashboard::GetNumber("Y", 0);
+
+        std::cout << "X " << x_val << std::endl;
+
 
     }
 };
