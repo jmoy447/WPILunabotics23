@@ -99,7 +99,8 @@ class Helen_Test : public frc::TimedRobot {
         // drive(-50);
         // turn(45);
         // linear_slider.Set(ControlMode::PercentOutput, 10);
-       print_encoders();
+        localization();
+    //    print_encoders();
     }
 
     void localization() {
